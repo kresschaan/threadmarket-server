@@ -17,7 +17,6 @@ var authenticationAPI = require("./api/authentication");
 
 var app = express();
 const port = process.env.PORT || 3010;
-const mongoKeys = process.env.DB_CONN;
 
 const corsOptions = {
     origin: "*",
@@ -36,16 +35,12 @@ app.use("/api/orders", ordersAPI);
 app.use("/api/authenticate", authenticationAPI);
 app.use("/api/payment", paymentsAPI);
 
-async function connectToMongoDB() {
-    try {
-        await mongoose.connect(mongoKeys);
-        console.log("Connected to MongoDB");
-    } catch (error) {
-        console.error("Error connecting to MongoDB:", error);
-    }
-}
+// mongoose
+//     .connect(mongoKeys)
+//     .then(() => {
 
-connectToMongoDB();
+//     })
+//     .catch((err) => console.log(err));
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
