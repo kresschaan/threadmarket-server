@@ -17,6 +17,7 @@ var authenticationAPI = require("./api/authentication");
 
 var app = express();
 const port = process.env.PORT || 3010;
+const mongoKeys = process.env.DB_CONN;
 
 const corsOptions = {
     origin: "*",
@@ -24,37 +25,41 @@ const corsOptions = {
     optionSuccessStatus: 200,
 };
 
-app.use(cors(corsOptions));
-app.use(express.json());
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: false }));
+async function startServer() {
+    try {
+        await mongoose.connect(mongoKeys);
+        console.log("Connected to MongoDB");
 
-app.use("/api/users", usersAPI);
-app.use("/api/products", productsAPI);
-app.use("/api/orders", ordersAPI);
-app.use("/api/authenticate", authenticationAPI);
-app.use("/api/payment", paymentsAPI);
+        app.use(cors(corsOptions));
+        app.use(express.json());
+        app.use(bodyParser.json());
+        app.use(bodyParser.urlencoded({ extended: false }));
 
-// mongoose
-//     .connect(mongoKeys)
-//     .then(() => {
+        app.use("/api/users", usersAPI);
+        app.use("/api/products", productsAPI);
+        app.use("/api/orders", ordersAPI);
+        app.use("/api/authenticate", authenticationAPI);
+        app.use("/api/payment", paymentsAPI);
 
-//     })
-//     .catch((err) => console.log(err));
+        // catch 404 and forward to error handler
+        app.use(function (req, res, next) {
+            next(createError(404));
+        });
 
-// catch 404 and forward to error handler
-app.use(function (req, res, next) {
-    next(createError(404));
-});
+        // error handler
+        app.use(function (err, req, res, next) {
+            // set locals, only providing error in development
+            res.locals.message = err.message;
+            res.locals.error = req.app.get("env") === "development" ? err : {};
 
-// error handler
-app.use(function (err, req, res, next) {
-    // set locals, only providing error in development
-    res.locals.message = err.message;
-    res.locals.error = req.app.get("env") === "development" ? err : {};
+            // render the error page
+            res.status(err.status || 500).json({ error: err.message });
+        });
+    } catch (error) {
+        console.error("Error connecting to MongoDB:", error);
+    }
+}
 
-    // render the error page
-    res.status(err.status || 500).json({ error: err.message });
-});
+startServer();
 
 module.exports = app;
