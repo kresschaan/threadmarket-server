@@ -36,12 +36,16 @@ app.use("/api/orders", ordersAPI);
 app.use("/api/authenticate", authenticationAPI);
 app.use("/api/payment", paymentsAPI);
 
-mongoose
-    .connect(mongoKeys)
-    .then(() => {
-        // console.log("Connected to MongoDB");
-    })
-    .catch((err) => console.log(err));
+async function connectToMongoDB() {
+    try {
+        await mongoose.connect(mongoKeys);
+        console.log("Connected to MongoDB");
+    } catch (error) {
+        console.error("Error connecting to MongoDB:", error);
+    }
+}
+
+connectToMongoDB();
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
